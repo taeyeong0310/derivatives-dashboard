@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>파생금융상품 대시보드</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 1rem 2rem;
+      text-align: center;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      padding: 2rem;
+    }
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+    }
+    .card h3 {
+      margin-top: 0;
+    }
+    .chart-placeholder {
+      height: 200px;
+      background-color: #ecf0f1;
+      border: 2px dashed #bdc3c7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: #7f8c8d;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>파생금융상품 대시보드</h1>
+  </header>
+
+  <main class="dashboard">
+    <div class="card">
+      <h3>선물(Futures)</h3>
+      <p>정해진 미래 시점에 자산을 사거나 팔기로 한 계약. 가격 변동에 따라 수익 또는 손실 발생.</p>
+    </div>
+
+    <div class="card">
+      <h3>옵션(Options)</h3>
+      <p>특정 자산을 미래에 사거나 팔 수 있는 권리를 매매. 리스크 제한 가능.</p>
+    </div>
+
+    <div class="card">
+      <h3>스왑(Swaps)</h3>
+      <p>두 당사자가 서로 다른 현금 흐름을 교환하는 계약. 금리, 통화 스왑 등이 있음.</p>
+    </div>
+
+    <div class="card">
+      <h3>리스크</h3>
+      <p>파생상품은 높은 레버리지와 복잡성으로 인해 큰 손실을 초래할 수 있음. 투자 전 충분한 이해 필요.</p>
+    </div>
+
+    <div class="card">
+      <h3>수익 구조 예시</h3>
+      <div class="chart-placeholder">[차트 영역 – 차후 JavaScript로 구현 가능]</div>
+    </div>
+  </main>
+</body>
+</html>
