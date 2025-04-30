@@ -5,1111 +5,756 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>과외 수입/지출 관리 시스템</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
     <style>
         body {
             font-family: 'Noto Sans KR', sans-serif;
-            min-height: 100vh;
+            background-color: #f8f9fa;
         }
-        .settings-panel {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
+        .modal {
+            transition: opacity 0.25s ease;
         }
-        .settings-panel.active {
-            max-height: 800px;
+        .modal-active {
+            overflow-y: visible !important;
         }
-        .grid-container {
-            display: grid;
-            grid-template-columns: 120px 100px 150px 150px 150px 150px 150px 80px;
+        .tab-active {
+            background-color: #4299e1;
+            color: white;
+        }
+        .form-input {
             border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            width: 100%;
         }
-        .grid-header {
-            background-color: #f8fafc;
-            font-weight: 600;
+        table {
+            border-collapse: collapse;
+            width: 100%;
         }
-        .grid-cell {
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
+        th {
+            cursor: pointer;
         }
-        .no-spinners::-webkit-inner-spin-button,
-        .no-spinners::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        .no-spinners {
-            -moz-appearance: textfield;
-        }
-        .summary-box {
-            background-color: #f0f9ff;
-            border-left: 4px solid #0ea5e9;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-        }
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                width: 100%;
-                margin: 0;
-                padding: 0;
-            }
+        th:hover {
+            background-color: #edf2f7;
         }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div class="container mx-auto px-4 py-6 max-w-7xl">
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6 max-w-6xl">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <h1 id="systemTitle" class="text-2xl font-bold text-blue-800">과외 수입/지출 관리 시스템</h1>
-            <div class="flex space-x-2">
-                <button id="settingsBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded flex items-center">
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6 flex justify-between items-center">
+            <h1 id="systemTitle" class="text-2xl font-bold text-gray-800">과외 수입/지출 관리 시스템</h1>
+            <div class="space-x-2">
+                <button id="settingsBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg flex items-center">
                     <i class="fas fa-cog mr-2"></i> 설정
                 </button>
-                <button id="backupBtn" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded flex items-center">
-                    <i class="fas fa-download mr-2"></i> 백업
-                </button>
-                <button id="restoreBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded flex items-center">
-                    <i class="fas fa-upload mr-2"></i> 복원
-                </button>
-                <button id="resetBtn" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded flex items-center">
-                    <i class="fas fa-trash mr-2"></i> 초기화
-                </button>
             </div>
         </div>
 
-        <!-- Settings Panel -->
-        <div id="settingsPanel" class="settings-panel mb-6 bg-white rounded-lg shadow-md p-4 border border-gray-200">
-            <h2 class="text-xl font-semibold mb-4 text-gray-700">시스템 설정</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="text-lg font-medium mb-2 text-gray-700">일반 설정</h3>
-                    <div class="mb-4">
-                        <label for="customTitle" class="block text-sm font-medium text-gray-700 mb-1">시스템 제목</label>
-                        <input type="text" id="customTitle" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" value="과외 수입/지출 관리 시스템">
-                    </div>
-                </div>
-
-                <div>
-                    <h3 class="text-lg font-medium mb-2 text-gray-700">테마 설정</h3>
-                    <div class="mb-4">
-                        <label for="themeColor" class="block text-sm font-medium text-gray-700 mb-1">테마 색상</label>
-                        <select id="themeColor" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <option value="blue">파랑</option>
-                            <option value="green">초록</option>
-                            <option value="purple">보라</option>
-                            <option value="red">빨강</option>
-                            <option value="gray">회색</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-lg font-medium mb-2 text-gray-700">구분 항목 관리</h3>
-                    <div class="mb-2">
-                        <div class="flex items-center mb-2">
-                            <input type="text" id="newTypeInput" placeholder="새 구분 추가" class="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <button id="addTypeBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-r-md">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="typeList" class="border border-gray-300 rounded-md p-2 max-h-32 overflow-y-auto"></div>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-lg font-medium mb-2 text-gray-700">카테고리 항목 관리</h3>
-                    <div class="mb-2">
-                        <div class="flex items-center mb-2">
-                            <input type="text" id="newCategoryInput" placeholder="새 카테고리 추가" class="flex-grow px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <button id="addCategoryBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-r-md">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <div id="categoryList" class="border border-gray-300 rounded-md p-2 max-h-32 overflow-y-auto"></div>
-                    </div>
-                </div>
+        <!-- Summary Section -->
+        <div class="bg-white rounded-lg shadow-md p-4 mb-6 grid grid-cols-3 gap-4">
+            <div class="border p-4 rounded-lg bg-blue-50">
+                <h3 class="text-sm text-gray-500 mb-1">총 수입</h3>
+                <p id="totalIncome" class="text-xl font-bold text-blue-600">0원</p>
             </div>
+            <div class="border p-4 rounded-lg bg-red-50">
+                <h3 class="text-sm text-gray-500 mb-1">총 지출</h3>
+                <p id="totalExpense" class="text-xl font-bold text-red-600">0원</p>
+            </div>
+            <div class="border p-4 rounded-lg bg-green-50">
+                <h3 class="text-sm text-gray-500 mb-1">순이익</h3>
+                <p id="totalProfit" class="text-xl font-bold text-green-600">0원</p>
+            </div>
+        </div>
 
-            <div class="mt-6 flex justify-end">
-                <button id="saveSettingsBtn" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded">
-                    <i class="fas fa-save mr-2"></i> 설정 저장
+        <!-- Entry Form Tabs -->
+        <div class="bg-white rounded-lg shadow-md mb-6">
+            <div class="flex border-b">
+                <button id="incomeTab" class="tab-active py-3 px-6 font-medium text-center flex-1">
+                    수입 입력
+                </button>
+                <button id="expenseTab" class="py-3 px-6 font-medium text-center flex-1 bg-gray-100 text-gray-700">
+                    지출 입력
                 </button>
             </div>
-        </div>
 
-        <!-- Summary Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div class="summary-box rounded-lg shadow p-4">
-                <div class="text-sm text-gray-500 mb-1">총 수입</div>
-                <div class="text-xl font-bold text-blue-600" id="totalIncome">0원</div>
-            </div>
-            <div class="summary-box rounded-lg shadow p-4">
-                <div class="text-sm text-gray-500 mb-1">총 지출</div>
-                <div class="text-xl font-bold text-red-600" id="totalExpense">0원</div>
-            </div>
-            <div class="summary-box rounded-lg shadow p-4">
-                <div class="text-sm text-gray-500 mb-1">순이익</div>
-                <div class="text-xl font-bold text-green-600" id="netProfit">0원</div>
-            </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="border-b border-gray-200 mb-4">
-            <ul class="flex flex-wrap -mb-px" id="tabs">
-                <li class="mr-2">
-                    <button class="tab-btn inline-block p-4 border-b-2 border-blue-500 rounded-t-lg active" data-tab="transactions">
-                        <i class="fas fa-list mr-2"></i> 거래 내역
-                    </button>
-                </li>
-                <li class="mr-2">
-                    <button class="tab-btn inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300" data-tab="statistics">
-                        <i class="fas fa-chart-bar mr-2"></i> 통계
-                    </button>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Transactions Tab Content -->
-        <div id="transactions" class="tab-content active">
-            <!-- New Entry Form -->
-            <div class="bg-white shadow-md rounded-lg p-4 mb-6">
-                <div class="flex flex-wrap -mx-2">
-                    <div class="px-2 mb-4 w-full md:w-1/6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="entryDate">
-                            날짜
-                        </label>
-                        <input type="date" id="entryDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            <!-- Income Form -->
+            <div id="incomeForm" class="p-4">
+                <div class="grid grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">날짜</label>
+                        <input type="date" id="incomeDate" class="form-input">
                     </div>
-                    <div class="px-2 mb-4 w-full md:w-1/6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="entryType">
-                            구분
-                        </label>
-                        <select id="entryType" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="수입">수입</option>
-                            <option value="지출">지출</option>
-                        </select>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">학생명</label>
+                        <input type="text" id="incomeStudent" class="form-input" placeholder="학생 이름">
                     </div>
-                    <div class="px-2 mb-4 w-full md:w-1/6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="entryCategory">
-                            카테고리
-                        </label>
-                        <select id="entryCategory" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
+                        <select id="incomeCategory" class="form-input">
                             <option value="과외비">과외비</option>
-                            <option value="중개수수료">중개수수료</option>
+                            <option value="특강비">특강비</option>
                             <option value="교재비">교재비</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">금액</label>
+                        <input type="number" id="incomeAmount" class="form-input" placeholder="0">
+                    </div>
+                    <div class="flex items-end">
+                        <button id="addIncome" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg w-full flex justify-center items-center">
+                            <i class="fas fa-plus mr-2"></i> 추가
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">비고</label>
+                    <input type="text" id="incomeNote" class="form-input" placeholder="비고 사항">
+                </div>
+            </div>
+
+            <!-- Expense Form -->
+            <div id="expenseForm" class="p-4 hidden">
+                <div class="grid grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">날짜</label>
+                        <input type="date" id="expenseDate" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">관련 학생</label>
+                        <input type="text" id="expenseStudent" class="form-input" placeholder="관련 학생 (선택사항)">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
+                        <select id="expenseCategory" class="form-input">
+                            <option value="중개수수료">중개수수료</option>
+                            <option value="교재구입">교재구입</option>
                             <option value="교통비">교통비</option>
                             <option value="기타">기타</option>
                         </select>
                     </div>
-                    <div class="px-2 mb-4 w-full md:w-1/6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="entryStudent">
-                            학생명
-                        </label>
-                        <input type="text" id="entryStudent" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">금액</label>
+                        <input type="number" id="expenseAmount" class="form-input" placeholder="0">
                     </div>
-                    <div class="px-2 mb-4 w-full md:w-1/6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="entryAmount">
-                            금액
-                        </label>
-                        <input type="number" id="entryAmount" class="no-spinners shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    </div>
-                    <div class="px-2 mb-4 w-full md:w-1/6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2" for="entryNote">
-                            비고
-                        </label>
-                        <input type="text" id="entryNote" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <div class="flex items-end">
+                        <button id="addExpense" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg w-full flex justify-center items-center">
+                            <i class="fas fa-plus mr-2"></i> 추가
+                        </button>
                     </div>
                 </div>
-                <div class="flex justify-end">
-                    <button id="addEntryBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        <i class="fas fa-plus mr-2"></i> 추가
-                    </button>
-                </div>
-            </div>
-
-            <!-- Transaction Grid -->
-            <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6">
-                <div class="grid-container">
-                    <div class="grid-cell grid-header">날짜</div>
-                    <div class="grid-cell grid-header">구분</div>
-                    <div class="grid-cell grid-header">카테고리</div>
-                    <div class="grid-cell grid-header">학생명</div>
-                    <div class="grid-cell grid-header">금액</div>
-                    <div class="grid-cell grid-header">비고</div>
-                    <div class="grid-cell grid-header">작성일</div>
-                    <div class="grid-cell grid-header">관리</div>
-                </div>
-                <div id="entryList" class="max-h-[500px] overflow-y-auto">
-                    <!-- Entries will be added here dynamically -->
+                <div class="mt-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">비고</label>
+                    <input type="text" id="expenseNote" class="form-input" placeholder="비고 사항">
                 </div>
             </div>
         </div>
 
-        <!-- Statistics Tab Content -->
-        <div id="statistics" class="tab-content">
-            <div class="bg-white shadow-md rounded-lg p-4 mb-6">
-                <h3 class="text-lg font-medium mb-4 text-gray-700">월별 통계</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="border rounded-lg p-4">
-                        <h4 class="font-medium text-gray-600 mb-2">월별 수입</h4>
-                        <div id="monthlyIncomeStats" class="max-h-[300px] overflow-y-auto">
-                            <!-- Monthly income stats will be added here -->
-                        </div>
+        <!-- Transaction List -->
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="mb-4 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-gray-800">거래 내역</h2>
+                <div class="flex space-x-2">
+                    <button id="sortByDate" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-1 px-3 rounded-lg text-sm">
+                        날짜별 정렬
+                    </button>
+                    <button id="sortByStudent" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-1 px-3 rounded-lg text-sm">
+                        학생별 정렬
+                    </button>
+                    <button id="backupBtn" class="bg-green-500 hover:bg-green-600 text-white font-semibold py-1 px-3 rounded-lg text-sm">
+                        백업
+                    </button>
+                    <button id="restoreBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-3 rounded-lg text-sm">
+                        복원
+                    </button>
+                    <button id="clearBtn" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-3 rounded-lg text-sm">
+                        초기화
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="p-2 text-left">날짜</th>
+                            <th class="p-2 text-left">구분</th>
+                            <th class="p-2 text-left">카테고리</th>
+                            <th class="p-2 text-left">학생명</th>
+                            <th class="p-2 text-right">금액</th>
+                            <th class="p-2 text-left">비고</th>
+                            <th class="p-2 text-center">작업</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionList">
+                        <!-- 동적으로 추가될 내용 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+        
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-xl font-bold">시스템 설정</p>
+                    <button class="modal-close cursor-pointer z-50">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- System Title Setting -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="systemTitleInput">
+                        시스템 제목
+                    </label>
+                    <input id="systemTitleInput" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="시스템 제목">
+                </div>
+
+                <!-- Income Categories -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        수입 카테고리 관리
+                    </label>
+                    <div class="flex mb-2">
+                        <input id="newIncomeCategory" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="새 카테고리">
+                        <button id="addIncomeCategory" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">
+                            추가
+                        </button>
                     </div>
-                    <div class="border rounded-lg p-4">
-                        <h4 class="font-medium text-gray-600 mb-2">월별 지출</h4>
-                        <div id="monthlyExpenseStats" class="max-h-[300px] overflow-y-auto">
-                            <!-- Monthly expense stats will be added here -->
-                        </div>
-                    </div>
-                    <div class="border rounded-lg p-4">
-                        <h4 class="font-medium text-gray-600 mb-2">월별 순이익</h4>
-                        <div id="monthlyProfitStats" class="max-h-[300px] overflow-y-auto">
-                            <!-- Monthly profit stats will be added here -->
-                        </div>
+                    <div class="bg-gray-100 p-2 rounded">
+                        <ul id="incomeCategoryList" class="list-disc list-inside">
+                            <!-- 동적으로 추가될 내용 -->
+                        </ul>
                     </div>
                 </div>
 
-                <h3 class="text-lg font-medium mb-4 text-gray-700">카테고리별 통계</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="border rounded-lg p-4">
-                        <h4 class="font-medium text-gray-600 mb-2">수입 카테고리</h4>
-                        <div id="incomeCategoryStats" class="max-h-[300px] overflow-y-auto">
-                            <!-- Income category stats will be added here -->
-                        </div>
+                <!-- Expense Categories -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        지출 카테고리 관리
+                    </label>
+                    <div class="flex mb-2">
+                        <input id="newExpenseCategory" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" placeholder="새 카테고리">
+                        <button id="addExpenseCategory" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">
+                            추가
+                        </button>
                     </div>
-                    <div class="border rounded-lg p-4">
-                        <h4 class="font-medium text-gray-600 mb-2">지출 카테고리</h4>
-                        <div id="expenseCategoryStats" class="max-h-[300px] overflow-y-auto">
-                            <!-- Expense category stats will be added here -->
-                        </div>
+                    <div class="bg-gray-100 p-2 rounded">
+                        <ul id="expenseCategoryList" class="list-disc list-inside">
+                            <!-- 동적으로 추가될 내용 -->
+                        </ul>
                     </div>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button id="saveSettings" class="px-4 bg-blue-500 p-2 rounded-lg text-white hover:bg-blue-600">
+                        저장
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Hidden file input for restore functionality -->
-    <input type="file" id="fileInput" style="display: none;" accept=".json">
+    <!-- Backup/Restore Modal -->
+    <div id="backupModal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+        
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-xl font-bold">데이터 백업/복원</p>
+                    <button class="modal-close cursor-pointer z-50">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        백업 데이터
+                    </label>
+                    <textarea id="backupData" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-40" placeholder="백업 데이터를 붙여넣으세요."></textarea>
+                </div>
+
+                <div class="flex justify-between pt-2">
+                    <button id="copyBackupData" class="px-4 bg-green-500 p-2 rounded-lg text-white hover:bg-green-600">
+                        백업 데이터 복사
+                    </button>
+                    <button id="confirmRestore" class="px-4 bg-yellow-500 p-2 rounded-lg text-white hover:bg-yellow-600">
+                        데이터 복원
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Confirmation Modal -->
+    <div id="clearModal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
+        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+        
+        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+            <div class="modal-content py-4 text-left px-6">
+                <div class="flex justify-between items-center pb-3">
+                    <p class="text-xl font-bold">데이터 초기화</p>
+                    <button class="modal-close cursor-pointer z-50">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <p class="mb-4">정말로 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
+
+                <div class="flex justify-end pt-2">
+                    <button class="modal-close px-4 bg-gray-500 p-2 rounded-lg text-white hover:bg-gray-600 mr-2">
+                        취소
+                    </button>
+                    <button id="confirmClear" class="px-4 bg-red-500 p-2 rounded-lg text-white hover:bg-red-600">
+                        초기화 확인
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize settings from localStorage
-            const settings = getSettings();
-            
-            // Initialize data from localStorage
-            let entries = getEntries();
-            
-            // Set system title
-            updateSystemTitle();
-            
-            // Populate type and category lists in settings
-            populateTypeList();
-            populateCategoryList();
-            populateEntryCategories();
-            
-            // Render entries
-            renderEntries();
-            
-            // Calculate and update summary stats
-            updateSummaryStats();
-            
-            // Update statistics
-            updateStatistics();
+        // 데이터 모델
+        let transactions = [];
+        let settings = {
+            systemTitle: '과외 수입/지출 관리 시스템',
+            incomeCategories: ['과외비', '특강비', '교재비', '기타'],
+            expenseCategories: ['중개수수료', '교재구입', '교통비', '기타']
+        };
 
-            // Event: Toggle settings panel
-            document.getElementById('settingsBtn').addEventListener('click', () => {
-                const panel = document.getElementById('settingsPanel');
-                panel.classList.toggle('active');
+        // DOM 요소
+        document.addEventListener('DOMContentLoaded', function() {
+            // 오늘 날짜를 기본값으로 설정
+            const today = new Date().toISOString().slice(0, 10);
+            document.getElementById('incomeDate').value = today;
+            document.getElementById('expenseDate').value = today;
+
+            // 설정 불러오기 및 적용
+            loadSettings();
+            applySettings();
+            
+            // 거래 데이터 불러오기
+            loadTransactions();
+            renderTransactions();
+            updateSummary();
+
+            // 탭 전환 이벤트
+            document.getElementById('incomeTab').addEventListener('click', () => {
+                document.getElementById('incomeForm').classList.remove('hidden');
+                document.getElementById('expenseForm').classList.add('hidden');
+                document.getElementById('incomeTab').classList.add('tab-active');
+                document.getElementById('incomeTab').classList.remove('bg-gray-100', 'text-gray-700');
+                document.getElementById('expenseTab').classList.remove('tab-active');
+                document.getElementById('expenseTab').classList.add('bg-gray-100', 'text-gray-700');
             });
 
-            // Event: Save settings
-            document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+            document.getElementById('expenseTab').addEventListener('click', () => {
+                document.getElementById('expenseForm').classList.remove('hidden');
+                document.getElementById('incomeForm').classList.add('hidden');
+                document.getElementById('expenseTab').classList.add('tab-active');
+                document.getElementById('expenseTab').classList.remove('bg-gray-100', 'text-gray-700');
+                document.getElementById('incomeTab').classList.remove('tab-active');
+                document.getElementById('incomeTab').classList.add('bg-gray-100', 'text-gray-700');
+            });
 
-            // Event: Add new entry
-            document.getElementById('addEntryBtn').addEventListener('click', addEntry);
+            // 수입 추가 이벤트
+            document.getElementById('addIncome').addEventListener('click', () => {
+                const date = document.getElementById('incomeDate').value;
+                const student = document.getElementById('incomeStudent').value;
+                const category = document.getElementById('incomeCategory').value;
+                const amount = parseInt(document.getElementById('incomeAmount').value) || 0;
+                const note = document.getElementById('incomeNote').value;
 
-            // Event: Add new type
-            document.getElementById('addTypeBtn').addEventListener('click', addType);
+                if (!date || amount <= 0) {
+                    alert('날짜와 금액을 올바르게 입력해주세요.');
+                    return;
+                }
 
-            // Event: Add new category
-            document.getElementById('addCategoryBtn').addEventListener('click', addCategory);
+                addTransaction({
+                    id: Date.now(),
+                    date,
+                    type: '수입',
+                    category,
+                    student,
+                    amount,
+                    note
+                });
 
-            // Event: Backup data
-            document.getElementById('backupBtn').addEventListener('click', backupData);
+                // 입력 폼 초기화
+                document.getElementById('incomeStudent').value = '';
+                document.getElementById('incomeAmount').value = '';
+                document.getElementById('incomeNote').value = '';
+            });
 
-            // Event: Restore data
+            // 지출 추가 이벤트
+            document.getElementById('addExpense').addEventListener('click', () => {
+                const date = document.getElementById('expenseDate').value;
+                const student = document.getElementById('expenseStudent').value;
+                const category = document.getElementById('expenseCategory').value;
+                const amount = parseInt(document.getElementById('expenseAmount').value) || 0;
+                const note = document.getElementById('expenseNote').value;
+
+                if (!date || amount <= 0) {
+                    alert('날짜와 금액을 올바르게 입력해주세요.');
+                    return;
+                }
+
+                addTransaction({
+                    id: Date.now(),
+                    date,
+                    type: '지출',
+                    category,
+                    student,
+                    amount: -amount,  // 지출은 음수로 저장
+                    note
+                });
+
+                // 입력 폼 초기화
+                document.getElementById('expenseStudent').value = '';
+                document.getElementById('expenseAmount').value = '';
+                document.getElementById('expenseNote').value = '';
+            });
+
+            // 정렬 버튼 이벤트
+            document.getElementById('sortByDate').addEventListener('click', () => {
+                sortTransactions('date');
+            });
+
+            document.getElementById('sortByStudent').addEventListener('click', () => {
+                sortTransactions('student');
+            });
+
+            // 백업/복원 버튼 이벤트
+            document.getElementById('backupBtn').addEventListener('click', () => {
+                openBackupModal();
+            });
+
             document.getElementById('restoreBtn').addEventListener('click', () => {
-                document.getElementById('fileInput').click();
+                openBackupModal();
             });
 
-            // Event: Process restored file
-            document.getElementById('fileInput').addEventListener('change', handleFileRestore);
+            document.getElementById('copyBackupData').addEventListener('click', () => {
+                const backupData = document.getElementById('backupData');
+                backupData.select();
+                document.execCommand('copy');
+                alert('백업 데이터가 클립보드에 복사되었습니다.');
+            });
 
-            // Event: Reset all data
-            document.getElementById('resetBtn').addEventListener('click', resetData);
+            document.getElementById('confirmRestore').addEventListener('click', () => {
+                restoreData();
+            });
 
-            // Event: Tab switching
-            document.querySelectorAll('.tab-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    // Remove active class from all tabs and content
-                    document.querySelectorAll('.tab-btn').forEach(btn => {
-                        btn.classList.remove('active', 'border-blue-500');
-                        btn.classList.add('border-transparent');
-                    });
-                    document.querySelectorAll('.tab-content').forEach(content => {
-                        content.classList.remove('active');
-                    });
-                    
-                    // Add active class to clicked tab
-                    e.currentTarget.classList.add('active', 'border-blue-500');
-                    e.currentTarget.classList.remove('border-transparent');
-                    
-                    // Show corresponding content
-                    const tabId = e.currentTarget.getAttribute('data-tab');
-                    document.getElementById(tabId).classList.add('active');
+            // 초기화 버튼 이벤트
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                openClearModal();
+            });
 
-                    // Update statistics if moving to stats tab
-                    if (tabId === 'statistics') {
-                        updateStatistics();
-                    }
+            document.getElementById('confirmClear').addEventListener('click', () => {
+                clearData();
+                closeModal('clearModal');
+            });
+
+            // 설정 버튼 이벤트
+            document.getElementById('settingsBtn').addEventListener('click', () => {
+                openSettingsModal();
+            });
+
+            document.getElementById('saveSettings').addEventListener('click', () => {
+                saveSettings();
+                closeModal('settingsModal');
+            });
+
+            // 카테고리 추가 이벤트
+            document.getElementById('addIncomeCategory').addEventListener('click', () => {
+                const newCategory = document.getElementById('newIncomeCategory').value.trim();
+                if (newCategory && !settings.incomeCategories.includes(newCategory)) {
+                    settings.incomeCategories.push(newCategory);
+                    updateCategoryList();
+                    document.getElementById('newIncomeCategory').value = '';
+                }
+            });
+
+            document.getElementById('addExpenseCategory').addEventListener('click', () => {
+                const newCategory = document.getElementById('newExpenseCategory').value.trim();
+                if (newCategory && !settings.expenseCategories.includes(newCategory)) {
+                    settings.expenseCategories.push(newCategory);
+                    updateCategoryList();
+                    document.getElementById('newExpenseCategory').value = '';
+                }
+            });
+
+            // 모달 닫기 버튼 이벤트
+            document.querySelectorAll('.modal-close').forEach(button => {
+                button.addEventListener('click', () => {
+                    closeAllModals();
                 });
             });
 
-            // Event: Theme color change
-            document.getElementById('themeColor').addEventListener('change', (e) => {
-                applyThemeColor(e.target.value);
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', () => {
+                    closeAllModals();
+                });
             });
-
-            // Apply initial theme color
-            applyThemeColor(settings.themeColor || 'blue');
         });
 
-        // Get settings from localStorage
-        function getSettings() {
-            const defaultSettings = {
-                title: '과외 수입/지출 관리 시스템',
-                types: ['수입', '지출'],
-                categories: ['과외비', '중개수수료', '교재비', '교통비', '기타'],
-                themeColor: 'blue'
-            };
-            
-            const storedSettings = localStorage.getItem('tutoring_settings');
-            return storedSettings ? JSON.parse(storedSettings) : defaultSettings;
+        // 거래 추가 함수
+        function addTransaction(transaction) {
+            transactions.push(transaction);
+            saveTransactions();
+            renderTransactions();
+            updateSummary();
         }
 
-        // Save settings to localStorage
+        // 거래 삭제 함수
+        function deleteTransaction(id) {
+            transactions = transactions.filter(t => t.id !== id);
+            saveTransactions();
+            renderTransactions();
+            updateSummary();
+        }
+
+        // 거래 렌더링 함수
+        function renderTransactions() {
+            const list = document.getElementById('transactionList');
+            list.innerHTML = '';
+
+            transactions.forEach(t => {
+                const row = document.createElement('tr');
+                row.className = t.amount >= 0 ? 'border-b hover:bg-blue-50' : 'border-b hover:bg-red-50';
+
+                row.innerHTML = `
+                    <td class="p-2">${formatDate(t.date)}</td>
+                    <td class="p-2">${t.type}</td>
+                    <td class="p-2">${t.category}</td>
+                    <td class="p-2">${t.student || '-'}</td>
+                    <td class="p-2 text-right ${t.amount >= 0 ? 'text-blue-600' : 'text-red-600'}">${formatCurrency(t.amount)}</td>
+                    <td class="p-2">${t.note || ''}</td>
+                    <td class="p-2 text-center">
+                        <button class="text-red-500 hover:text-red-700" onclick="deleteTransaction(${t.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        // 요약 정보 업데이트 함수
+        function updateSummary() {
+            const totalIncome = transactions
+                .filter(t => t.amount > 0)
+                .reduce((sum, t) => sum + t.amount, 0);
+            
+            const totalExpense = transactions
+                .filter(t => t.amount < 0)
+                .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+            
+            const profit = totalIncome - totalExpense;
+
+            document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
+            document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
+            document.getElementById('totalProfit').textContent = formatCurrency(profit);
+        }
+
+        // 거래 정렬 함수
+        function sortTransactions(field) {
+            if (field === 'date') {
+                transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (field === 'student') {
+                transactions.sort((a, b) => {
+                    const studentA = a.student || '';
+                    const studentB = b.student || '';
+                    return studentA.localeCompare(studentB, 'ko');
+                });
+            }
+            renderTransactions();
+        }
+
+        // 데이터 저장/불러오기 함수
+        function saveTransactions() {
+            localStorage.setItem('tutorTransactions', JSON.stringify(transactions));
+        }
+
+        function loadTransactions() {
+            const saved = localStorage.getItem('tutorTransactions');
+            if (saved) {
+                transactions = JSON.parse(saved);
+            }
+        }
+
         function saveSettings() {
-            const title = document.getElementById('customTitle').value;
-            const themeColor = document.getElementById('themeColor').value;
-            
-            // Get types and categories from the lists
-            const types = Array.from(document.querySelectorAll('#typeList .type-item')).map(item => {
-                return item.querySelector('.type-text').textContent;
-            });
-            
-            const categories = Array.from(document.querySelectorAll('#categoryList .category-item')).map(item => {
-                return item.querySelector('.category-text').textContent;
-            });
-            
-            const settings = {
-                title,
-                types,
-                categories,
-                themeColor
-            };
-            
-            localStorage.setItem('tutoring_settings', JSON.stringify(settings));
-            
-            // Update UI
-            updateSystemTitle();
-            populateEntryCategories();
-            applyThemeColor(themeColor);
-            
-            // Hide settings panel
-            document.getElementById('settingsPanel').classList.remove('active');
-            
-            // Show success message
-            alert('설정이 저장되었습니다.');
+            settings.systemTitle = document.getElementById('systemTitleInput').value || settings.systemTitle;
+            localStorage.setItem('tutorSettings', JSON.stringify(settings));
+            applySettings();
         }
 
-        // Update system title
-        function updateSystemTitle() {
-            const settings = getSettings();
-            document.getElementById('systemTitle').textContent = settings.title;
-            document.getElementById('customTitle').value = settings.title;
-            document.title = settings.title;
-        }
-
-        // Apply theme color
-        function applyThemeColor(color) {
-            const colorMap = {
-                blue: {
-                    primary: 'bg-blue-600 hover:bg-blue-700',
-                    border: 'border-blue-500',
-                    text: 'text-blue-800',
-                    summary: 'border-left: 4px solid #0ea5e9; background-color: #f0f9ff;'
-                },
-                green: {
-                    primary: 'bg-green-600 hover:bg-green-700',
-                    border: 'border-green-500',
-                    text: 'text-green-800',
-                    summary: 'border-left: 4px solid #16a34a; background-color: #f0fdf4;'
-                },
-                purple: {
-                    primary: 'bg-purple-600 hover:bg-purple-700',
-                    border: 'border-purple-500',
-                    text: 'text-purple-800',
-                    summary: 'border-left: 4px solid #9333ea; background-color: #faf5ff;'
-                },
-                red: {
-                    primary: 'bg-red-600 hover:bg-red-700',
-                    border: 'border-red-500',
-                    text: 'text-red-800',
-                    summary: 'border-left: 4px solid #dc2626; background-color: #fef2f2;'
-                },
-                gray: {
-                    primary: 'bg-gray-600 hover:bg-gray-700',
-                    border: 'border-gray-500',
-                    text: 'text-gray-800',
-                    summary: 'border-left: 4px solid #4b5563; background-color: #f9fafb;'
-                }
-            };
-            
-            // Update theme color in settings
-            const settings = getSettings();
-            settings.themeColor = color;
-            localStorage.setItem('tutoring_settings', JSON.stringify(settings));
-            
-            // Set dropdown to match current theme
-            document.getElementById('themeColor').value = color;
-            
-            // Update buttons
-            const btns = document.querySelectorAll('#addTypeBtn, #addCategoryBtn, #saveSettingsBtn, #addEntryBtn');
-            const oldClasses = ['bg-blue-600', 'hover:bg-blue-700', 'bg-green-600', 'hover:bg-green-700', 
-                                'bg-purple-600', 'hover:bg-purple-700', 'bg-red-600', 'hover:bg-red-700',
-                                'bg-gray-600', 'hover:bg-gray-700'];
-            
-            btns.forEach(btn => {
-                oldClasses.forEach(cls => btn.classList.remove(cls));
-                btn.classList.add(colorMap[color].primary.split(' ')[0]);
-                btn.classList.add(colorMap[color].primary.split(' ')[1]);
-            });
-            
-            // Update active tab
-            const activeTab = document.querySelector('.tab-btn.active');
-            const oldBorders = ['border-blue-500', 'border-green-500', 'border-purple-500', 'border-red-500', 'border-gray-500'];
-            oldBorders.forEach(cls => activeTab.classList.remove(cls));
-            activeTab.classList.add(colorMap[color].border);
-            
-            // Update title color
-            const title = document.getElementById('systemTitle');
-            const oldTexts = ['text-blue-800', 'text-green-800', 'text-purple-800', 'text-red-800', 'text-gray-800'];
-            oldTexts.forEach(cls => title.classList.remove(cls));
-            title.classList.add(colorMap[color].text);
-            
-            // Update summary boxes
-            const summaryBoxes = document.querySelectorAll('.summary-box');
-            summaryBoxes.forEach(box => {
-                box.setAttribute('style', colorMap[color].summary);
-            });
-        }
-
-        // Get entries from localStorage
-        function getEntries() {
-            const storedEntries = localStorage.getItem('tutoring_entries');
-            return storedEntries ? JSON.parse(storedEntries) : [];
-        }
-
-        // Save entries to localStorage
-        function saveEntries(entries) {
-            localStorage.setItem('tutoring_entries', JSON.stringify(entries));
-        }
-
-        // Populate type list in settings
-        function populateTypeList() {
-            const typeList = document.getElementById('typeList');
-            typeList.innerHTML = '';
-            
-            const settings = getSettings();
-            settings.types.forEach(type => {
-                const typeItem = document.createElement('div');
-                typeItem.className = 'type-item flex justify-between items-center mb-1 p-1 bg-gray-50 rounded';
-                typeItem.innerHTML = `
-                    <span class="type-text">${type}</span>
-                    <button class="delete-type-btn text-red-500 hover:text-red-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                typeList.appendChild(typeItem);
-                
-                // Event: Delete type
-                typeItem.querySelector('.delete-type-btn').addEventListener('click', () => {
-                    if (settings.types.length <= 1) {
-                        alert('최소 하나의 구분 항목이 필요합니다.');
-                        return;
-                    }
-                    
-                    const index = settings.types.indexOf(type);
-                    if (index > -1) {
-                        settings.types.splice(index, 1);
-                        localStorage.setItem('tutoring_settings', JSON.stringify(settings));
-                        populateTypeList();
-                    }
-                });
-            });
-        }
-
-        // Populate category list in settings
-        function populateCategoryList() {
-            const categoryList = document.getElementById('categoryList');
-            categoryList.innerHTML = '';
-            
-            const settings = getSettings();
-            settings.categories.forEach(category => {
-                const categoryItem = document.createElement('div');
-                categoryItem.className = 'category-item flex justify-between items-center mb-1 p-1 bg-gray-50 rounded';
-                categoryItem.innerHTML = `
-                    <span class="category-text">${category}</span>
-                    <button class="delete-category-btn text-red-500 hover:text-red-700">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                categoryList.appendChild(categoryItem);
-                
-                // Event: Delete category
-                categoryItem.querySelector('.delete-category-btn').addEventListener('click', () => {
-                    if (settings.categories.length <= 1) {
-                        alert('최소 하나의 카테고리 항목이 필요합니다.');
-                        return;
-                    }
-                    
-                    const index = settings.categories.indexOf(category);
-                    if (index > -1) {
-                        settings.categories.splice(index, 1);
-                        localStorage.setItem('tutoring_settings', JSON.stringify(settings));
-                        populateCategoryList();
-                    }
-                });
-            });
-        }
-
-        // Add new type
-        function addType() {
-            const newTypeInput = document.getElementById('newTypeInput');
-            const newType = newTypeInput.value.trim();
-            
-            if (!newType) {
-                alert('구분 항목을 입력해주세요.');
-                return;
+        function loadSettings() {
+            const saved = localStorage.getItem('tutorSettings');
+            if (saved) {
+                settings = JSON.parse(saved);
             }
-            
-            const settings = getSettings();
-            if (settings.types.includes(newType)) {
-                alert('이미 존재하는 구분 항목입니다.');
-                return;
-            }
-            
-            settings.types.push(newType);
-            localStorage.setItem('tutoring_settings', JSON.stringify(settings));
-            
-            newTypeInput.value = '';
-            populateTypeList();
         }
 
-        // Add new category
-        function addCategory() {
-            const newCategoryInput = document.getElementById('newCategoryInput');
-            const newCategory = newCategoryInput.value.trim();
-            
-            if (!newCategory) {
-                alert('카테고리 항목을 입력해주세요.');
-                return;
-            }
-            
-            const settings = getSettings();
-            if (settings.categories.includes(newCategory)) {
-                alert('이미 존재하는 카테고리 항목입니다.');
-                return;
-            }
-            
-            settings.categories.push(newCategory);
-            localStorage.setItem('tutoring_settings', JSON.stringify(settings));
-            
-            newCategoryInput.value = '';
-            populateCategoryList();
-            populateEntryCategories();
-        }
+        function applySettings() {
+            // 시스템 제목 적용
+            document.getElementById('systemTitle').textContent = settings.systemTitle;
+            document.getElementById('systemTitleInput').value = settings.systemTitle;
+            document.title = settings.systemTitle;
 
-        // Populate entry type and category dropdowns
-        function populateEntryCategories() {
-            const entryType = document.getElementById('entryType');
-            const entryCategory = document.getElementById('entryCategory');
+            // 카테고리 적용
+            const incomeSelect = document.getElementById('incomeCategory');
+            const expenseSelect = document.getElementById('expenseCategory');
             
-            // Clear existing options
-            entryType.innerHTML = '';
-            entryCategory.innerHTML = '';
-            
-            // Add options from settings
-            const settings = getSettings();
-            settings.types.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.textContent = type;
-                entryType.appendChild(option);
-            });
-            
-            settings.categories.forEach(category => {
+            incomeSelect.innerHTML = '';
+            settings.incomeCategories.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category;
                 option.textContent = category;
-                entryCategory.appendChild(option);
+                incomeSelect.appendChild(option);
             });
+            
+            expenseSelect.innerHTML = '';
+            settings.expenseCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                expenseSelect.appendChild(option);
+            });
+
+            updateCategoryList();
         }
 
-        // Add new entry
-        function addEntry() {
-            const date = document.getElementById('entryDate').value;
-            const type = document.getElementById('entryType').value;
-            const category = document.getElementById('entryCategory').value;
-            const student = document.getElementById('entryStudent').value;
-            const amount = parseFloat(document.getElementById('entryAmount').value);
-            const note = document.getElementById('entryNote').value;
+        // 카테고리 목록 업데이트
+        function updateCategoryList() {
+            const incomeList = document.getElementById('incomeCategoryList');
+            const expenseList = document.getElementById('expenseCategoryList');
             
-            if (!date) {
-                alert('날짜를 선택해주세요.');
-                return;
-            }
-            
-            if (isNaN(amount) || amount <= 0) {
-                alert('유효한 금액을 입력해주세요.');
-                return;
-            }
-            
-            const entry = {
-                id: Date.now().toString(),
-                date,
-                type,
-                category,
-                student,
-                amount,
-                note,
-                created: new Date().toISOString()
-            };
-            
-            const entries = getEntries();
-            entries.push(entry);
-            saveEntries(entries);
-            
-            // Clear form
-            document.getElementById('entryDate').value = '';
-            document.getElementById('entryStudent').value = '';
-            document.getElementById('entryAmount').value = '';
-            document.getElementById('entryNote').value = '';
-            
-            // Re-render entries
-            renderEntries();
-            
-            // Update summary stats
-            updateSummaryStats();
-        }
-
-        // Render entries
-        function renderEntries() {
-            const entryList = document.getElementById('entryList');
-            entryList.innerHTML = '';
-            
-            const entries = getEntries();
-            entries.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date (newest first)
-            
-            entries.forEach(entry => {
-                const row = document.createElement('div');
-                row.className = 'grid-container';
-                row.innerHTML = `
-                    <div class="grid-cell">${formatDate(entry.date)}</div>
-                    <div class="grid-cell ${entry.type === '수입' ? 'text-blue-600' : 'text-red-600'}">${entry.type}</div>
-                    <div class="grid-cell">${entry.category}</div>
-                    <div class="grid-cell">${entry.student}</div>
-                    <div class="grid-cell text-right">${formatCurrency(entry.amount)}</div>
-                    <div class="grid-cell">${entry.note}</div>
-                    <div class="grid-cell">${formatDateTime(entry.created)}</div>
-                    <div class="grid-cell">
-                        <div class="flex space-x-1">
-                            <button class="edit-btn bg-yellow-500 hover:bg-yellow-600 text-white p-1 rounded" data-id="${entry.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="delete-btn bg-red-500 hover:bg-red-600 text-white p-1 rounded" data-id="${entry.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                entryList.appendChild(row);
-                
-                // Event: Edit entry
-                row.querySelector('.edit-btn').addEventListener('click', () => {
-                    editEntry(entry.id);
-                });
-                
-                // Event: Delete entry
-                row.querySelector('.delete-btn').addEventListener('click', () => {
-                    deleteEntry(entry.id);
-                });
-            });
-        }
-
-        // Edit entry
-        function editEntry(id) {
-            const entries = getEntries();
-            const entry = entries.find(e => e.id === id);
-            
-            if (!entry) return;
-            
-            // Prompt for each field
-            const newDate = prompt('날짜', entry.date);
-            if (!newDate) return;
-            
-            const newType = prompt('구분 (수입 또는 지출)', entry.type);
-            if (!newType) return;
-            
-            const newCategory = prompt('카테고리', entry.category);
-            if (!newCategory) return;
-            
-            const newStudent = prompt('학생명', entry.student);
-            if (newStudent === null) return;
-            
-            const newAmountStr = prompt('금액', entry.amount);
-            if (!newAmountStr) return;
-            const newAmount = parseFloat(newAmountStr);
-            if (isNaN(newAmount) || newAmount <= 0) {
-                alert('유효한 금액을 입력해주세요.');
-                return;
-            }
-            
-            const newNote = prompt('비고', entry.note);
-            if (newNote === null) return;
-            
-            // Update entry
-            entry.date = newDate;
-            entry.type = newType;
-            entry.category = newCategory;
-            entry.student = newStudent;
-            entry.amount = newAmount;
-            entry.note = newNote;
-            
-            saveEntries(entries);
-            
-            // Re-render entries
-            renderEntries();
-            
-            // Update summary stats
-            updateSummaryStats();
-        }
-
-        // Delete entry
-        function deleteEntry(id) {
-            if (!confirm('정말로 이 항목을 삭제하시겠습니까?')) return;
-            
-            const entries = getEntries();
-            const index = entries.findIndex(e => e.id === id);
-            
-            if (index > -1) {
-                entries.splice(index, 1);
-                saveEntries(entries);
-                
-                // Re-render entries
-                renderEntries();
-                
-                // Update summary stats
-                updateSummaryStats();
-            }
-        }
-
-        // Update summary stats
-        function updateSummaryStats() {
-            const entries = getEntries();
-            
-            const totalIncome = entries
-                .filter(entry => entry.type === '수입')
-                .reduce((sum, entry) => sum + entry.amount, 0);
-                
-            const totalExpense = entries
-                .filter(entry => entry.type === '지출')
-                .reduce((sum, entry) => sum + entry.amount, 0);
-                
-            const netProfit = totalIncome - totalExpense;
-            
-            document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
-            document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
-            document.getElementById('netProfit').textContent = formatCurrency(netProfit);
-            
-            // Update statistics if on stats tab
-            if (document.getElementById('statistics').classList.contains('active')) {
-                updateStatistics();
-            }
-        }
-
-        // Update statistics
-        function updateStatistics() {
-            updateMonthlyStats();
-            updateCategoryStats();
-        }
-
-        // Update monthly statistics
-        function updateMonthlyStats() {
-            const entries = getEntries();
-            
-            // Group by month
-            const monthlyData = {};
-            
-            entries.forEach(entry => {
-                const month = entry.date.substring(0, 7); // YYYY-MM
-                
-                if (!monthlyData[month]) {
-                    monthlyData[month] = {
-                        income: 0,
-                        expense: 0
-                    };
-                }
-                
-                if (entry.type === '수입') {
-                    monthlyData[month].income += entry.amount;
-                } else {
-                    monthlyData[month].expense += entry.amount;
-                }
-            });
-            
-            // Sort months
-            const sortedMonths = Object.keys(monthlyData).sort().reverse();
-            
-            // Update monthly income stats
-            const monthlyIncomeStats = document.getElementById('monthlyIncomeStats');
-            monthlyIncomeStats.innerHTML = '';
-            
-            sortedMonths.forEach(month => {
-                const income = monthlyData[month].income;
-                const incomeItem = document.createElement('div');
-                incomeItem.className = 'flex justify-between items-center py-1 border-b';
-                incomeItem.innerHTML = `
-                    <span>${formatYearMonth(month)}</span>
-                    <span class="font-medium text-blue-600">${formatCurrency(income)}</span>
-                `;
-                monthlyIncomeStats.appendChild(incomeItem);
-            });
-            
-            // Update monthly expense stats
-            const monthlyExpenseStats = document.getElementById('monthlyExpenseStats');
-            monthlyExpenseStats.innerHTML = '';
-            
-            sortedMonths.forEach(month => {
-                const expense = monthlyData[month].expense;
-                const expenseItem = document.createElement('div');
-                expenseItem.className = 'flex justify-between items-center py-1 border-b';
-                expenseItem.innerHTML = `
-                    <span>${formatYearMonth(month)}</span>
-                    <span class="font-medium text-red-600">${formatCurrency(expense)}</span>
-                `;
-                monthlyExpenseStats.appendChild(expenseItem);
-            });
-            
-            // Update monthly profit stats
-            const monthlyProfitStats = document.getElementById('monthlyProfitStats');
-            monthlyProfitStats.innerHTML = '';
-            
-            sortedMonths.forEach(month => {
-                const income = monthlyData[month].income;
-                const expense = monthlyData[month].expense;
-                const profit = income - expense;
-                
-                const profitItem = document.createElement('div');
-                profitItem.className = 'flex justify-between items-center py-1 border-b';
-                profitItem.innerHTML = `
-                    <span>${formatYearMonth(month)}</span>
-                    <span class="font-medium ${profit >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(profit)}</span>
-                `;
-                monthlyProfitStats.appendChild(profitItem);
-            });
-        }
-
-        // Update category statistics
-        function updateCategoryStats() {
-            const entries = getEntries();
-            
-            // Group by category
-            const incomeCategoryData = {};
-            const expenseCategoryData = {};
-            
-            entries.forEach(entry => {
-                if (entry.type === '수입') {
-                    if (!incomeCategoryData[entry.category]) {
-                        incomeCategoryData[entry.category] = 0;
-                    }
-                    incomeCategoryData[entry.category] += entry.amount;
-                } else {
-                    if (!expenseCategoryData[entry.category]) {
-                        expenseCategoryData[entry.category] = 0;
-                    }
-                    expenseCategoryData[entry.category] += entry.amount;
-                }
-            });
-            
-            // Sort categories by amount (descending)
-            const sortedIncomeCategories = Object.keys(incomeCategoryData).sort((a, b) => {
-                return incomeCategoryData[b] - incomeCategoryData[a];
-            });
-            
-            const sortedExpenseCategories = Object.keys(expenseCategoryData).sort((a, b) => {
-                return expenseCategoryData[b] - expenseCategoryData[a];
-            });
-            
-            // Update income category stats
-            const incomeCategoryStats = document.getElementById('incomeCategoryStats');
-            incomeCategoryStats.innerHTML = '';
-            
-            sortedIncomeCategories.forEach(category => {
-                const amount = incomeCategoryData[category];
-                const categoryItem = document.createElement('div');
-                categoryItem.className = 'flex justify-between items-center py-1 border-b';
-                categoryItem.innerHTML = `
+            incomeList.innerHTML = '';
+            settings.incomeCategories.forEach(category => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center py-1';
+                li.innerHTML = `
                     <span>${category}</span>
-                    <span class="font-medium text-blue-600">${formatCurrency(amount)}</span>
+                    <button class="text-red-500 hover:text-red-700" onclick="removeCategory('income', '${category}')">
+                        <i class="fas fa-times"></i>
+                    </button>
                 `;
-                incomeCategoryStats.appendChild(categoryItem);
+                incomeList.appendChild(li);
             });
             
-            // Update expense category stats
-            const expenseCategoryStats = document.getElementById('expenseCategoryStats');
-            expenseCategoryStats.innerHTML = '';
-            
-            sortedExpenseCategories.forEach(category => {
-                const amount = expenseCategoryData[category];
-                const categoryItem = document.createElement('div');
-                categoryItem.className = 'flex justify-between items-center py-1 border-b';
-                categoryItem.innerHTML = `
+            expenseList.innerHTML = '';
+            settings.expenseCategories.forEach(category => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center py-1';
+                li.innerHTML = `
                     <span>${category}</span>
-                    <span class="font-medium text-red-600">${formatCurrency(amount)}</span>
+                    <button class="text-red-500 hover:text-red-700" onclick="removeCategory('expense', '${category}')">
+                        <i class="fas fa-times"></i>
+                    </button>
                 `;
-                expenseCategoryStats.appendChild(categoryItem);
+                expenseList.appendChild(li);
             });
         }
 
-        // Backup data
-        function backupData() {
-            const data = {
-                settings: getSettings(),
-                entries: getEntries()
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `과외관리_백업_${formatDateForFilename()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+        // 카테고리 삭제
+        function removeCategory(type, category) {
+            if (type === 'income') {
+                settings.incomeCategories = settings.incomeCategories.filter(c => c !== category);
+            } else {
+                settings.expenseCategories = settings.expenseCategories.filter(c => c !== category);
+            }
+            updateCategoryList();
         }
 
-        // Handle file restore
-        function handleFileRestore(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    if (!data.settings || !data.entries) {
-                        throw new Error('유효하지 않은 백업 파일입니다.');
-                    }
-                    
-                    // Restore data
-                    localStorage.setItem('tutoring_settings', JSON.stringify(data.settings));
-                    localStorage.setItem('tutoring_entries', JSON.stringify(data.entries));
-                    
-                    // Update UI
-                    updateSystemTitle();
-                    populateTypeList();
-                    populateCategoryList();
-                    populateEntryCategories();
-                    renderEntries();
-                    updateSummaryStats();
-                    applyThemeColor(data.settings.themeColor || 'blue');
-                    
-                    alert('백업에서 복원되었습니다.');
-                } catch (error) {
-                    alert('백업 복원 중 오류가 발생했습니다: ' + error.message);
+        // 모달 제어 함수
+        function openSettingsModal() {
+            const modal = document.getElementById('settingsModal');
+            document.getElementById('systemTitleInput').value = settings.systemTitle;
+            updateCategoryList();
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        }
+
+        function openBackupModal() {
+            const modal = document.getElementById('backupModal');
+            document.getElementById('backupData').value = JSON.stringify({
+                transactions,
+                settings
+            });
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        }
+
+        function openClearModal() {
+            const modal = document.getElementById('clearModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('modal-active');
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('modal-active');
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            });
+            document.body.classList.remove('modal-active');
+        }
+
+        // 백업 데이터 복원
+        function restoreData() {
+            try {
+                const data = JSON.parse(document.getElementById('backupData').value);
+                if (data.transactions && data.settings) {
+                    transactions = data.transactions;
+                    settings = data.settings;
+                    saveTransactions();
+                    saveSettings();
+                    applySettings();
+                    renderTransactions();
+                    updateSummary();
+                    closeModal('backupModal');
+                    alert('데이터가 성공적으로 복원되었습니다.');
+                } else {
+                    alert('유효하지 않은 백업 데이터입니다.');
                 }
-                
-                // Clear file input
-                e.target.value = '';
-            };
-            
-            reader.readAsText(file);
+            } catch (e) {
+                alert('데이터 복원에 실패했습니다. 올바른 백업 데이터를 입력해주세요.');
+            }
         }
 
-        // Reset all data
-        function resetData() {
-            if (!confirm('정말로 모든 데이터를 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
-            
-            // Confirm again to prevent accidental reset
-            if (!confirm('모든 설정과 거래 내역이 삭제됩니다. 정말 진행하시겠습니까?')) return;
-            
-            // Reset settings and entries
-            localStorage.removeItem('tutoring_settings');
-            localStorage.removeItem('tutoring_entries');
-            
-            // Update UI
-            updateSystemTitle();
-            populateTypeList();
-            populateCategoryList();
-            populateEntryCategories();
-            renderEntries();
-            updateSummaryStats();
-            applyThemeColor('blue');
-            
-            alert('모든 데이터가 초기화되었습니다.');
+        // 데이터 초기화
+        function clearData() {
+            transactions = [];
+            saveTransactions();
+            renderTransactions();
+            updateSummary();
+            alert('모든 거래 데이터가 초기화되었습니다.');
         }
 
-        // Helper: Format currency
-        function formatCurrency(amount) {
-            return amount.toLocaleString('ko-KR') + '원';
-        }
-
-        // Helper: Format date
+        // 유틸리티 함수
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return dateString.replace(/-/g, '.');
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
-        // Helper: Format date and time
-        function formatDateTime(dateTimeString) {
-            const date = new Date(dateTimeString);
-            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        }
-
-        // Helper: Format year-month
-        function formatYearMonth(yearMonth) {
-            const [year, month] = yearMonth.split('-');
-            return `${year}년 ${month}월`;
-        }
-
-        // Helper: Format date for filename
-        function formatDateForFilename() {
-            const now = new Date();
-            return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ko-KR', { 
+                style: 'decimal',
+                maximumFractionDigits: 0
+            }).format(Math.abs(amount)) + '원';
         }
     </script>
 </body>
